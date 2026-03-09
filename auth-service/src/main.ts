@@ -1,32 +1,25 @@
-import './tracing'; 
+import './tracing'; // DEVE ser o 1º import — inicializa o SDK OTel antes de tudo
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
 import { ValidationPipe } from '@nestjs/common';
+import { winstonConfig } from './common/logger/winston.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: WinstonModule.createLogger({
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json(), // JSON é melhor para o Grafana/Loki ler
-          ),
-        }),
-      ],
-    }),
+    // Bootstrap logger: captura logs de inicialização do NestJS (antes de DI estar pronto).
+    // Usa a mesma config de produção para que NENHUM log de boot escape sem redact/OTel.
+    logger: WinstonModule.createLogger(winstonConfig),
   });
 
-  // --- A MÁGICA DA VALIDAÇÃO ---
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,            // Remove campos do JSON que não estão no DTO
-    forbidNonWhitelisted: true,  // Retorna erro se tentarem enviar campos extras
-    transform: true,            // Converte os tipos automaticamente
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,           // Remove campos não declarados no DTO
+      forbidNonWhitelisted: true, // Retorna erro se campos extras forem enviados
+      transform: true,           // Converte tipos automaticamente
+    }),
+  );
 
   await app.listen(3001);
-  console.log(`🚀 Auth Service rodando na porta 3001`);
 }
 bootstrap();

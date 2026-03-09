@@ -7,27 +7,19 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED) // Retorna 201 explicitamente
+  @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto) {
-    
-    const user = await this.usersService.create(createUserDto);
-    
-    
-    const { password, ...result } = user;
-    return result;
+    // O Service já devolve o usuário sem a senha
+    return await this.usersService.create(createUserDto);
   }
 
   @Get('email/:email')
   async findByEmail(@Param('email') email: string) {
-    const user = await this.usersService.findByEmailOrFail(email);
-    const { password, ...result } = user;
-    return result;
+    return await this.usersService.findByEmailOrFail(email);
   }
 
   @Get(':id')
   async findById(@Param('id') id: string) {
-    const user = await this.usersService.findById(id);
-    const { password, ...result } = user;
-    return result;
+    return await this.usersService.findById(id);
   }
 }

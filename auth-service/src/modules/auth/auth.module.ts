@@ -2,20 +2,20 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
-import { UsersService } from '../users/users.service'; // Importamos a classe concreta
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { LocalStrategy } from './strategies/local.strategy'; 
+import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { GoogleStrategy } from './strategies/google.stategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
-    UsersModule, // Necessário porque vamos usar o UsersService
+    UsersModule,
     PassportModule,
     JwtModule.register({
       global: true,
-      secret: 'SUA_CHAVE_SECRETA', // Substitua por variáveis de ambiente depois
+      secret: process.env.JWT_SECRET ?? 'SUA_CHAVE_SECRETA',
       signOptions: { expiresIn: '1h' },
     }),
   ],
@@ -23,12 +23,8 @@ import { GoogleStrategy } from './strategies/google.stategy';
     AuthService,
     LocalStrategy,
     JwtStrategy,
-    GoogleStrategy, // Registre a estratégia JWT aqui!
-    { provide: 'IAuthUserProvider', useExisting: UsersService },
-    {
-      provide: 'IAuthUserProvider', // O Token definido no @Inject
-      useExisting: UsersService,    // Usa a instância do UsersService que já existe
-    },
+    GoogleStrategy,
+    { provide: 'IAuthUserProvider', useExisting: UsersService }, // Provider único (sem duplicata)
   ],
   controllers: [AuthController],
 })
