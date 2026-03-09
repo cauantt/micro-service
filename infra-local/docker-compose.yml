@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # --- BANCOS DE DADOS E MENSAGERIA ---
+  db-auth:
+    image: postgres:15-alpine
+    container_name: postgres_auth
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_auth
+    ports: ["5432:5432"]
+
+  db-commerce:
+    image: postgres:15-alpine
+    container_name: postgres_commerce
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db_commerce
+    ports: ["5433:5432"]
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_broker
+    ports: ["6379:6379"]
+
+  # --- A BALA DE PRATA DA OBSERVABILIDADE (LGTM) ---
+  otel:
+    image: grafana/otel-lgtm:0.6.0
+    container_name: lgtm_stack
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "8001:3000"   # Acesso ao Grafana (Mudamos para 8001)
+      - "4317:4317"   # OTLP gRPC (Por onde o NestJS envia os traces)
+      - "4318:4318"   # OTLP HTTP
+      - "8002:9090"   # Acesso direto ao Prometheus
+    volumes:
+      - ./config/prometheus.yaml:/otel-lgtm/prometheus.yaml
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  grafana-data:
