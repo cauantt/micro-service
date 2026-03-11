@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
@@ -12,6 +13,9 @@ import { winstonConfig } from './common/logger/winston.config';
 
 @Module({
   imports: [
+    // Configuration Module: Loads .env by default
+    ConfigModule.forRoot({ isGlobal: true }),
+
     // Pillar 1 — Logs: Winston global, injetável via WINSTON_MODULE_PROVIDER
     WinstonModule.forRoot(winstonConfig),
 

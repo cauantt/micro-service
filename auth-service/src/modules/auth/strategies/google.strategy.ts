@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ConfigService } from '@nestjs/config';
 import type { IAuthUserProvider } from '../interfaces/auth-user-provider.interface';
 
 @Injectable()
@@ -10,11 +11,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     @Inject('IAuthUserProvider')
     private readonly userProvider: IAuthUserProvider,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: ConfigService,
   ) {
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL!,
+      clientID: configService.getOrThrow<string>('GOOGLE_CLIENT_ID'),
+      clientSecret: configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
+      callbackURL: configService.getOrThrow<string>('GOOGLE_CALLBACK_URL'),
       scope: ['email', 'profile'],
     });
   }

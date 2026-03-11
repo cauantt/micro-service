@@ -5,13 +5,13 @@ import { Logger as WinstonLogger } from 'winston';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { MetricsService } from '../metrics/metrics.service';
 import { maskEmail } from '../logger/mask.util';
-import {
+import type {
   AuthLoginSuccessEvent,
   AuthLoginFailureEvent,
   AuthLoginErrorEvent,
   AuthGoogleEvent,
 } from '../events/auth.events';
-import {
+import type {
   UserCreatedEvent,
   UserConflictEvent,
   UserNotFoundEvent,
